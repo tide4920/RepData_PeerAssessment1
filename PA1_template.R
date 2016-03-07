@@ -1,17 +1,17 @@
----
-title: "PA1_template"
-output: html_document
----
+#Course 5 March 2016
+# Project 1
+#PA1_template.R
+library(data.table)
+setwd("/Users/Murali/Documents/Coursera/Course 5/Week 1")
+#path=getwd()
+# downloading data zip file - already done
+# listing all files in the zip folder
+unzip("repdata-data-activity.zip",list=T)
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
-
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
-
-```{r}
-setwd("/Users/Murali/Documents/Coursera/Course5/Week1/RepData_PeerAssessment1")
-
+memory.size()
 # unzipped the files manually in the .zip file 
-
+# initially all dates, time and other variables read as factors
+# instructions say missing values coded as ?
 
 activity <- read.csv("activity.csv", sep=",", header=T)
 names(activity)
@@ -92,5 +92,52 @@ plot(activity_steps_interval$interval, activity_steps_interval$average, data = a
 title("average number of steps taken daily over a given interval")
 lines(activity_steps_interval$interval, activity_steps_interval$average)
 
-```
+
+
+
+
+
+
+
+
+
+
+SCC <- readRDS("Source_Classification_Code.rds")
+
+dim(SCC)   # row = 11,717 column = 25
+head(SCC)
+str(SCC)
+SCC$SCC <- as.character(SCC$SCC)   # SCC variable in SCC data frame is Factor, in NEI is character
+str(SCC)
+
+dim(NEI)   # row = 6,497,651 column = 6
+head(NEI)
+names(NEI)
+str(NEI)
+
+# plot 1
+par(mfrow=c(1,1))
+#emissions_year <- as.numeric(unlist(with(NEI, tapply(Emissions, year, sum))))  # gets rid of year in name
+#emissions_year  # without the as .numeric were getting the sum with name attached
+#str(emissions_year)
+#names(emissions_year)
+#Year <- unique(NEI$year)
+#Year
+#emissions_plot1 <- data.frame(cbind(Year, emissions_year))  # first set it up as a data frame
+
+
+# dplyr is a better method
+library(dplyr)
+NEI_year <- group_by(NEI, year)
+dim(NEI_year)
+emissions_year <- summarize(NEI_year, emis_yr = sum(Emissions))
+emissions_year
+
+with(emissions_year, plot(year, emis_yr, xlab= "Year", ylab="Total Emissions", 
+main = "Total PM2.5 emissions in US by year", pch=19))
+with(emissions_year, lines(year, emis_yr))
+dev.copy(png, file="Plot1.png")
+dev.off()
+
+
 
